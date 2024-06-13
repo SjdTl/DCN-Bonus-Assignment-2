@@ -1,0 +1,145 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{\PYGZsh{} Dijkstra.py}
+
+\PYG{k+kn}{import} \PYG{n+nn}{networkx} \PYG{k}{as} \PYG{n+nn}{nx}
+\PYG{k+kn}{import} \PYG{n+nn}{matplotlib.pyplot} \PYG{k}{as} \PYG{n+nn}{plt}
+\PYG{k+kn}{import} \PYG{n+nn}{pandas} \PYG{k}{as} \PYG{n+nn}{pd}
+\PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k}{as} \PYG{n+nn}{np}
+
+\PYG{k}{def} \PYG{n+nf}{initialize}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{A}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Find all vertices and initialize distances to infinity}
+
+\PYG{l+s+sd}{    Also checks if vertices are correct and fixes them if possible}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{c+c1}{\PYGZsh{} Find all vertices}
+    \PYG{n}{vertices} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{unique}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}start\PYGZus{}node\PYGZsq{}}\PYG{p}{]} \PYG{o}{+} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}end\PYGZus{}node\PYGZsq{}}\PYG{p}{])}
+
+
+    \PYG{c+c1}{\PYGZsh{} Check if nodes have correct values}
+    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)} \PYG{o}{==} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{:}
+        \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array\PYGZus{}equal}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{),} \PYG{n}{vertices}\PYG{p}{):}
+            \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Vertices are incorrect. Not all vertices are connected with edges or vertices have wrong names (names should be integers starting from 0!)\PYGZdq{}}\PYG{p}{)}     
+    \PYG{k}{else}\PYG{p}{:}
+        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Vertices are incorrect. Not all vertices are connected with edges or vertices have wrong names (names should be integers starting from 0!)\PYGZdq{}}\PYG{p}{)}     
+
+    
+    \PYG{c+c1}{\PYGZsh{} Initialize distances}
+    \PYG{n}{d} \PYG{o}{=} \PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{inf}\PYG{p}{]} \PYG{o}{*} \PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)}
+    \PYG{n}{d}\PYG{p}{[}\PYG{n}{A}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{0}
+
+    \PYG{n}{pi} \PYG{o}{=} \PYG{p}{[[]} \PYG{k}{for} \PYG{n}{\PYGZus{}} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)]}
+
+    \PYG{k}{return} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{d}\PYG{p}{),} \PYG{n}{pi}
+
+\PYG{k}{def} \PYG{n+nf}{dijkstra}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{A}\PYG{p}{,} \PYG{n}{B}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Description}
+\PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sd}{    Implementation of the Dijkstra algorithm}
+\PYG{l+s+sd}{    The nodes of G should be integers starting from 0}
+
+\PYG{l+s+sd}{    Parameters}
+\PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sd}{    G : dictionary}
+\PYG{l+s+sd}{        Contains the graph in the format}
+\PYG{l+s+sd}{            G = \PYGZob{}}
+\PYG{l+s+sd}{                start\PYGZus{}node = [0,1,2],}
+\PYG{l+s+sd}{                end\PYGZus{}node =   [2,3,4],}
+\PYG{l+s+sd}{                weights =    [2,2,4]}
+\PYG{l+s+sd}{                \PYGZcb{}}
+\PYG{l+s+sd}{            Which indicates a graph with three weighted edges:}
+\PYG{l+s+sd}{                \PYGZhy{} Edge going from node 0 to node 2 with weight 2}
+\PYG{l+s+sd}{                \PYGZhy{} Edge going from node 1 to node 4 with weight 2}
+\PYG{l+s+sd}{                \PYGZhy{} Edge going from node 2 to node 5 with weight 4}
+\PYG{l+s+sd}{    A : }
+\PYG{l+s+sd}{        Starting node}
+\PYG{l+s+sd}{    B : }
+\PYG{l+s+sd}{        Ending node}
+\PYG{l+s+sd}{    }
+\PYG{l+s+sd}{    Returns}
+\PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sd}{    shortest\PYGZus{}path : list}
+\PYG{l+s+sd}{        Shortest path from A to B starting with node A and ending with node B}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{d}\PYG{p}{,} \PYG{n}{pi} \PYG{o}{=} \PYG{n}{initialize}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{A}\PYG{p}{)}
+    \PYG{n}{Q} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{k+kc}{True}\PYG{p}{]} \PYG{o}{*} \PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}start\PYGZus{}node\PYGZsq{}}\PYG{p}{]} \PYG{o}{+} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}end\PYGZus{}node\PYGZsq{}}\PYG{p}{]))}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{))}
+
+    \PYG{k}{while} \PYG{n}{Q}\PYG{o}{.}\PYG{n}{any}\PYG{p}{()} \PYG{o}{==} \PYG{k+kc}{True}\PYG{p}{:}
+        \PYG{n}{u} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{argmin}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{where}\PYG{p}{(}\PYG{n}{Q}\PYG{p}{,} \PYG{n}{d}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{inf}\PYG{p}{))}
+        \PYG{n}{Q}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]} \PYG{o}{=} \PYG{k+kc}{False}
+
+        \PYG{k}{if} \PYG{n}{u} \PYG{o}{==} \PYG{n}{B}\PYG{p}{:}
+            \PYG{k}{return} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]}\PYG{o}{+}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n}{indices} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{where}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}start\PYGZus{}node\PYGZdq{}}\PYG{p}{]} \PYG{o}{==} \PYG{n}{u}\PYG{p}{)[}\PYG{l+m+mi}{0}\PYG{p}{]}
+            \PYG{k}{for} \PYG{n}{index} \PYG{o+ow}{in} \PYG{n}{indices}\PYG{p}{:}
+                \PYG{n}{w} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}weights\PYGZdq{}}\PYG{p}{][}\PYG{n}{index}\PYG{p}{]}
+                \PYG{n}{v} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}end\PYGZus{}node\PYGZdq{}}\PYG{p}{][}\PYG{n}{index}\PYG{p}{]}
+                \PYG{k}{if} \PYG{n}{d}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]} \PYG{o}{+} \PYG{n}{w} \PYG{o}{\PYGZlt{}} \PYG{n}{d}\PYG{p}{[}\PYG{n}{v}\PYG{p}{]:}
+                    \PYG{n}{d}\PYG{p}{[}\PYG{n}{v}\PYG{p}{]} \PYG{o}{=} \PYG{n}{d}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]} \PYG{o}{+} \PYG{n}{w}
+                    \PYG{p}{(}\PYG{n}{pi}\PYG{p}{[}\PYG{n}{v}\PYG{p}{])}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{u}\PYG{p}{)}
+
+\PYG{k}{def} \PYG{n+nf}{plot\PYGZus{}graph}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{pi}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Description}
+\PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sd}{    Plot the graph using networkX}
+
+\PYG{l+s+sd}{    Parameters}
+\PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sd}{    G : dictionary}
+\PYG{l+s+sd}{        See dijkstra() for format}
+\PYG{l+s+sd}{    pi : list}
+\PYG{l+s+sd}{        Shortest path as obtained by dijkstra()}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{G\PYGZus{}nx} \PYG{o}{=} \PYG{n}{nx}\PYG{o}{.}\PYG{n}{DiGraph}\PYG{p}{()}  
+    \PYG{n}{start\PYGZus{}node} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}start\PYGZus{}node\PYGZdq{}}\PYG{p}{]}
+    \PYG{n}{end\PYGZus{}node} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}end\PYGZus{}node\PYGZdq{}}\PYG{p}{]}
+    \PYG{n}{weights} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}weights\PYGZdq{}}\PYG{p}{]}
+
+    \PYG{c+c1}{\PYGZsh{} Add edges to the graph with weights}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{start\PYGZus{}node}\PYG{p}{)):}
+        \PYG{n}{G\PYGZus{}nx}\PYG{o}{.}\PYG{n}{add\PYGZus{}edge}\PYG{p}{(}\PYG{n}{start\PYGZus{}node}\PYG{p}{[}\PYG{n}{i}\PYG{p}{],} \PYG{n}{end\PYGZus{}node}\PYG{p}{[}\PYG{n}{i}\PYG{p}{],} \PYG{n}{weight}\PYG{o}{=}\PYG{n}{weights}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+
+    \PYG{n}{pos} \PYG{o}{=} \PYG{n}{nx}\PYG{o}{.}\PYG{n}{spring\PYGZus{}layout}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{)}  \PYG{c+c1}{\PYGZsh{} positions for all nodes}
+
+    \PYG{c+c1}{\PYGZsh{} Nodes with labels}
+    \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}nodes}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{node\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}skyblue\PYGZsq{}}\PYG{p}{,} \PYG{n}{node\PYGZus{}size}\PYG{o}{=}\PYG{l+m+mi}{1500}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.8}\PYG{p}{)}
+    \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}labels}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{font\PYGZus{}size}\PYG{o}{=}\PYG{l+m+mi}{12}\PYG{p}{,} \PYG{n}{font\PYGZus{}family}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}sans\PYGZhy{}serif\PYGZsq{}}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Edges}
+    \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}edges}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{edgelist}\PYG{o}{=}\PYG{n}{G\PYGZus{}nx}\PYG{o}{.}\PYG{n}{edges}\PYG{p}{(),} \PYG{n}{edge\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}black\PYGZsq{}}\PYG{p}{,} \PYG{n}{arrows}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{arrowsize}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{)}
+
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{)} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{):}
+        \PYG{n}{u} \PYG{o}{=} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}
+        \PYG{n}{v} \PYG{o}{=} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{i} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{]}
+        \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}edges}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{edgelist}\PYG{o}{=}\PYG{p}{[(}\PYG{n}{u}\PYG{p}{,} \PYG{n}{v}\PYG{p}{)],} \PYG{n}{edge\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}red\PYGZsq{}}\PYG{p}{,} \PYG{n}{arrows}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{arrowsize}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Edge labels}
+    \PYG{n}{edge\PYGZus{}labels} \PYG{o}{=} \PYG{p}{\PYGZob{}(}\PYG{n}{start\PYGZus{}node}\PYG{p}{[}\PYG{n}{i}\PYG{p}{],} \PYG{n}{end\PYGZus{}node}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]):} \PYG{n}{weights}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{start\PYGZus{}node}\PYG{p}{))\PYGZcb{}}
+    \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}edge\PYGZus{}labels}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{edge\PYGZus{}labels}\PYG{o}{=}\PYG{n}{edge\PYGZus{}labels}\PYG{p}{,} \PYG{n}{font\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}red\PYGZsq{}}\PYG{p}{)}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Graph with shortest path\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Graph.svg\PYGZdq{}}\PYG{p}{)}
+
+\PYG{k}{def} \PYG{n+nf}{run\PYGZus{}example}\PYG{p}{():}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Find shortest path of an example graph and save visualization}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{start\PYGZus{}node} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{]}
+    \PYG{n}{end\PYGZus{}node} \PYG{o}{=}   \PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}
+    \PYG{n}{weights} \PYG{o}{=}    \PYG{p}{[}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{]}
+
+    \PYG{n}{G} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}start\PYGZus{}node\PYGZdq{}} \PYG{p}{:} \PYG{n}{start\PYGZus{}node}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}end\PYGZus{}node\PYGZdq{}} \PYG{p}{:} \PYG{n}{end\PYGZus{}node}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}weights\PYGZdq{}} \PYG{p}{:} \PYG{n}{weights}\PYG{p}{\PYGZcb{}}
+    \PYG{n}{A} \PYG{o}{=} \PYG{l+m+mi}{0}
+    \PYG{n}{B} \PYG{o}{=} \PYG{l+m+mi}{1}
+
+    \PYG{n}{pi} \PYG{o}{=} \PYG{n}{dijkstra}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,}\PYG{n}{A}\PYG{p}{,}\PYG{n}{B}\PYG{p}{)}
+    \PYG{n}{plot\PYGZus{}graph}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{pi}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{)}
+
+\PYG{n}{run\PYGZus{}example}\PYG{p}{()}
+\end{Verbatim}

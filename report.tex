@@ -1,0 +1,50 @@
+\documentclass[11pt,fleqn]{article}
+
+\usepackage{a4wide}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{psfrag}
+\usepackage{color}
+\usepackage[dvips]{graphicx}
+\usepackage{hyperref}
+%\usepackage[widespace]{fourier}
+%\usepackage{txfonts}
+\usepackage{times}
+%\usepackage{mathfont}
+\usepackage{subcaption}
+\usepackage{framed}
+\usepackage{svg}
+\usepackage{minted}
+
+\begin{document}
+	\begin{center}
+		{\Large EE2T21 Data Communications Networking - 2024\\[0.1em]
+			Bonus Assignment \# 2 \\}
+	\end{center}
+
+    \parbox[l][17mm][t]{\textwidth}{Names: Sjoerd Terlouw \hspace{6.66cm}
+			Student ID: 5852455}
+	\section{Abstract}
+    Implementation of the Dijkstra algorithm in Python and performance analysis using the ER random graph.
+
+    \section{Example}
+    The following plot gives the shortest path (indicated in red) of a certain graph G using the Dijkstra algorithm. The plot itself is done using the NetworkX python library. 
+    The inputs are the edges between the nodes with their weights and the starting and ending node. In the case of figure \ref{fig:example} the starting node is 0 and the ending node is 1.
+    The exact format of the input can be found in the code, found in section \ref{section:code}.
+    \begin{figure}[H]
+        \centering
+        \includesvg[width = 0.7\textwidth]{Graph.svg}
+        \caption{Visualization of the shortest path found by the Dijkstra algorithm - output of Dijkstra.run\_example()}
+        \label{fig:example}
+    \end{figure}
+
+    \section{Performance analysis}
+    
+    \section{Code}
+    \label{section:code}
+    The code is also provided seperately and is on \href{https://github.com/SjdTl/DCN-Bonus-Assignment-2.git}{\color{blue}github}.
+    \inputminted[breaklines=true]{python3}{Dijkstra.py}
+\end{document}
