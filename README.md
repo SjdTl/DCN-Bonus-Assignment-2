@@ -1,7 +1,7 @@
 # DCN Bonus Assignment 2: Implementing the Dijkstra algorithm
 Implementation of the Dijkstra algorithm in python.
 
-The report is given in report.tex and the code in Dijkstra.py.
+The report is given in report.pdf and the code in Dijkstra.py.
 
 # Using Dijkstra.py
 The code mainly consists of the dijkstra algorithm (function dijkstra()) and a graph plotter (function graph()).

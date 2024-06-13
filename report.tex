@@ -41,8 +41,27 @@
         \label{fig:example}
     \end{figure}
 
+    \section{Erdős Rényi random graph}
+    The random graphs are made using the Erdős Rényi method. It takes $k$ edges from all possible edges given the node length.
+    The edges are always taken to be bidirectional. An example graph generated using the Erdős Rényi method is given in the next figure. 
+    Not all nodes are shown in the figure, since not all nodes are connected.
+    \begin{figure}[H]
+        \centering
+        \includesvg[width = 0.6\textwidth]{ER_example.svg}
+        \caption{Visualization of a ER random graph with $k=6$ and $N=5$ - output graph of Dijkstra.ER()}
+        \label{fig:ER_example}
+    \end{figure}
+
     \section{Performance analysis}
-    
+    The performance analysis is done by taking the ER graphs for different sample sizes with the same connectivity. The time complexity is $O(N^2)$ as can be clearly seen in the plot. This is because the implementation is not done using a priority cue.
+    \begin{figure}[H]
+        \centering
+        \includesvg[width = 0.6\textwidth]{time_complexity.svg}
+        \caption{Time complexity of the Dijkstra implementation - output of Dijkstra.performance\_analysis()}
+        \label{fig:ER_example}
+    \end{figure}
+
+
     \section{Code}
     \label{section:code}
     The code is also provided seperately and is on \href{https://github.com/SjdTl/DCN-Bonus-Assignment-2.git}{\color{blue}github}.

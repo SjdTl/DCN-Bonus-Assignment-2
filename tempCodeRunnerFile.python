@@ -1,0 +1,13 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.interpolate import interp1d
+
+fig, ax = plt.subplots()
+N = np.logspace(5, 15, num=40, base=2, dtype=int)
+k=20
+T = [10,10,10,10,10,10]
+priority_complexity = ((k*N)/2)*np.log(N)
+ax.plot(N, (N**2/N[5]**2)*T[5], label = '$O(N^2)$')
+ax.plot(N, priority_complexity/priority_complexity[5] * T[5], label = '$O((E+N)ln(N))$')
+plt.legend()
+plt.show()

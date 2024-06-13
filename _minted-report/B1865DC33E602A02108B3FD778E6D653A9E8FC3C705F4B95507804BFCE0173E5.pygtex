@@ -5,6 +5,9 @@
 \PYG{k+kn}{import} \PYG{n+nn}{matplotlib.pyplot} \PYG{k}{as} \PYG{n+nn}{plt}
 \PYG{k+kn}{import} \PYG{n+nn}{pandas} \PYG{k}{as} \PYG{n+nn}{pd}
 \PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k}{as} \PYG{n+nn}{np}
+\PYG{k+kn}{import} \PYG{n+nn}{itertools}
+\PYG{k+kn}{import} \PYG{n+nn}{time}
+\PYG{k+kn}{import} \PYG{n+nn}{tqdm}
 
 \PYG{k}{def} \PYG{n+nf}{initialize}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{A}\PYG{p}{):}
 \PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
@@ -16,14 +19,6 @@
     \PYG{n}{vertices} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{unique}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}start\PYGZus{}node\PYGZsq{}}\PYG{p}{]} \PYG{o}{+} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}end\PYGZus{}node\PYGZsq{}}\PYG{p}{])}
 
 
-    \PYG{c+c1}{\PYGZsh{} Check if nodes have correct values}
-    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)} \PYG{o}{==} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{:}
-        \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array\PYGZus{}equal}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{),} \PYG{n}{vertices}\PYG{p}{):}
-            \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Vertices are incorrect. Not all vertices are connected with edges or vertices have wrong names (names should be integers starting from 0!)\PYGZdq{}}\PYG{p}{)}     
-    \PYG{k}{else}\PYG{p}{:}
-        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Vertices are incorrect. Not all vertices are connected with edges or vertices have wrong names (names should be integers starting from 0!)\PYGZdq{}}\PYG{p}{)}     
-
-    
     \PYG{c+c1}{\PYGZsh{} Initialize distances}
     \PYG{n}{d} \PYG{o}{=} \PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{inf}\PYG{p}{]} \PYG{o}{*} \PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{vertices}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)}
     \PYG{n}{d}\PYG{p}{[}\PYG{n}{A}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{0}
@@ -62,6 +57,8 @@
 \PYG{l+s+sd}{    shortest\PYGZus{}path : list}
 \PYG{l+s+sd}{        Shortest path from A to B starting with node A and ending with node B}
 \PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{st} \PYG{o}{=} \PYG{n}{time}\PYG{o}{.}\PYG{n}{time}\PYG{p}{()}
+
     \PYG{n}{d}\PYG{p}{,} \PYG{n}{pi} \PYG{o}{=} \PYG{n}{initialize}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{A}\PYG{p}{)}
     \PYG{n}{Q} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{k+kc}{True}\PYG{p}{]} \PYG{o}{*} \PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}start\PYGZus{}node\PYGZsq{}}\PYG{p}{]} \PYG{o}{+} \PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}end\PYGZus{}node\PYGZsq{}}\PYG{p}{]))}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{))}
 
@@ -70,7 +67,8 @@
         \PYG{n}{Q}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]} \PYG{o}{=} \PYG{k+kc}{False}
 
         \PYG{k}{if} \PYG{n}{u} \PYG{o}{==} \PYG{n}{B}\PYG{p}{:}
-            \PYG{k}{return} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]}\PYG{o}{+}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]}
+            \PYG{n}{et} \PYG{o}{=} \PYG{n}{time}\PYG{o}{.}\PYG{n}{time}\PYG{p}{()}
+            \PYG{k}{return} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]}\PYG{o}{+}\PYG{p}{[}\PYG{n}{u}\PYG{p}{],} \PYG{p}{(}\PYG{n}{et}\PYG{o}{\PYGZhy{}}\PYG{n}{st}\PYG{p}{)}
         \PYG{k}{else}\PYG{p}{:}
             \PYG{n}{indices} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{where}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}start\PYGZus{}node\PYGZdq{}}\PYG{p}{]} \PYG{o}{==} \PYG{n}{u}\PYG{p}{)[}\PYG{l+m+mi}{0}\PYG{p}{]}
             \PYG{k}{for} \PYG{n}{index} \PYG{o+ow}{in} \PYG{n}{indices}\PYG{p}{:}
@@ -80,7 +78,36 @@
                     \PYG{n}{d}\PYG{p}{[}\PYG{n}{v}\PYG{p}{]} \PYG{o}{=} \PYG{n}{d}\PYG{p}{[}\PYG{n}{u}\PYG{p}{]} \PYG{o}{+} \PYG{n}{w}
                     \PYG{p}{(}\PYG{n}{pi}\PYG{p}{[}\PYG{n}{v}\PYG{p}{])}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{u}\PYG{p}{)}
 
-\PYG{k}{def} \PYG{n+nf}{plot\PYGZus{}graph}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{pi}\PYG{p}{):}
+\PYG{k}{def} \PYG{n+nf}{ER}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{k}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Description}
+\PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sd}{    Take k edges from all possible edges given the amount of nodes N}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{start\PYGZus{}node} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{n}{end\PYGZus{}node} \PYG{o}{=} \PYG{p}{[]}
+
+    \PYG{n}{nodes} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{N}\PYG{p}{)}
+    
+    \PYG{n}{pairs} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n+nb}{list}\PYG{p}{(}\PYG{n}{itertools}\PYG{o}{.}\PYG{n}{combinations}\PYG{p}{(}\PYG{n}{nodes}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)))}
+    
+    \PYG{k}{if} \PYG{n}{k} \PYG{o}{\PYGZgt{}} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{pairs}\PYG{p}{):}
+        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Number of edges (k) exceeds maximum possible edges.\PYGZdq{}}\PYG{p}{)}
+    
+    \PYG{n}{connected\PYGZus{}pairs} \PYG{o}{=} \PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{pairs}\PYG{p}{),} \PYG{n}{k}\PYG{p}{,} \PYG{n}{replace}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{))}
+
+    \PYG{n}{start\PYGZus{}node} \PYG{o}{=} \PYG{p}{[}\PYG{n}{pairs}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{][}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{k}{for} \PYG{n}{idx} \PYG{o+ow}{in} \PYG{n}{connected\PYGZus{}pairs}\PYG{p}{]}
+    \PYG{n}{end\PYGZus{}node} \PYG{o}{=} \PYG{p}{[}\PYG{n}{pairs}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{][}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{k}{for} \PYG{n}{idx} \PYG{o+ow}{in} \PYG{n}{connected\PYGZus{}pairs}\PYG{p}{]}
+
+    \PYG{n}{weights} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{*} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{start\PYGZus{}node} \PYG{o}{*} \PYG{l+m+mi}{2}\PYG{p}{)}
+
+    \PYG{n}{G} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}start\PYGZus{}node\PYGZdq{}} \PYG{p}{:} \PYG{n}{start\PYGZus{}node} \PYG{o}{+} \PYG{n}{end\PYGZus{}node}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}end\PYGZus{}node\PYGZdq{}} \PYG{p}{:} \PYG{n}{end\PYGZus{}node} \PYG{o}{+} \PYG{n}{start\PYGZus{}node}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}weights\PYGZdq{}} \PYG{p}{:} \PYG{n}{weights}\PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{return} \PYG{n}{G}
+
+\PYG{k}{def} \PYG{n+nf}{plot\PYGZus{}graph}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{pi}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}Graph\PYGZdq{}}\PYG{p}{,} \PYG{n}{title} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}Example graph with shortest path\PYGZdq{}}\PYG{p}{):}
 \PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
 \PYG{l+s+sd}{    Description}
 \PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
@@ -111,23 +138,27 @@
     \PYG{c+c1}{\PYGZsh{} Edges}
     \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}edges}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{edgelist}\PYG{o}{=}\PYG{n}{G\PYGZus{}nx}\PYG{o}{.}\PYG{n}{edges}\PYG{p}{(),} \PYG{n}{edge\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}black\PYGZsq{}}\PYG{p}{,} \PYG{n}{arrows}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{arrowsize}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{)}
 
-    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{)} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{):}
-        \PYG{n}{u} \PYG{o}{=} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}
-        \PYG{n}{v} \PYG{o}{=} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{i} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{]}
-        \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}edges}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{edgelist}\PYG{o}{=}\PYG{p}{[(}\PYG{n}{u}\PYG{p}{,} \PYG{n}{v}\PYG{p}{)],} \PYG{n}{edge\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}red\PYGZsq{}}\PYG{p}{,} \PYG{n}{arrows}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{arrowsize}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{pi} \PYG{o}{!=} \PYG{k+kc}{None}\PYG{p}{:}
+        \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{)} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{):}
+            \PYG{n}{u} \PYG{o}{=} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}
+            \PYG{n}{v} \PYG{o}{=} \PYG{n}{pi}\PYG{p}{[}\PYG{n}{i} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{]}
+            \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}edges}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{edgelist}\PYG{o}{=}\PYG{p}{[(}\PYG{n}{u}\PYG{p}{,} \PYG{n}{v}\PYG{p}{)],} \PYG{n}{edge\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}red\PYGZsq{}}\PYG{p}{,} \PYG{n}{arrows}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{arrowsize}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{)}
 
     \PYG{c+c1}{\PYGZsh{} Edge labels}
     \PYG{n}{edge\PYGZus{}labels} \PYG{o}{=} \PYG{p}{\PYGZob{}(}\PYG{n}{start\PYGZus{}node}\PYG{p}{[}\PYG{n}{i}\PYG{p}{],} \PYG{n}{end\PYGZus{}node}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]):} \PYG{n}{weights}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{start\PYGZus{}node}\PYG{p}{))\PYGZcb{}}
     \PYG{n}{nx}\PYG{o}{.}\PYG{n}{draw\PYGZus{}networkx\PYGZus{}edge\PYGZus{}labels}\PYG{p}{(}\PYG{n}{G\PYGZus{}nx}\PYG{p}{,} \PYG{n}{pos}\PYG{p}{,} \PYG{n}{edge\PYGZus{}labels}\PYG{o}{=}\PYG{n}{edge\PYGZus{}labels}\PYG{p}{,} \PYG{n}{font\PYGZus{}color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}red\PYGZsq{}}\PYG{p}{)}
 
-    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Graph with shortest path\PYGZsq{}}\PYG{p}{)}
-    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Graph.svg\PYGZdq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{n}{title}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{name} \PYG{o}{==} \PYG{k+kc}{None}\PYG{p}{:}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{()}
+    \PYG{k}{else}\PYG{p}{:}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{.svg\PYGZdq{}}\PYG{p}{)}
 
 \PYG{k}{def} \PYG{n+nf}{run\PYGZus{}example}\PYG{p}{():}
 \PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
 \PYG{l+s+sd}{    Find shortest path of an example graph and save visualization}
 \PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
-    \PYG{n}{start\PYGZus{}node} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{]}
+    \PYG{n}{start\PYGZus{}node} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{8}\PYG{p}{]}
     \PYG{n}{end\PYGZus{}node} \PYG{o}{=}   \PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}
     \PYG{n}{weights} \PYG{o}{=}    \PYG{p}{[}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{]}
 
@@ -137,9 +168,55 @@
     \PYG{n}{A} \PYG{o}{=} \PYG{l+m+mi}{0}
     \PYG{n}{B} \PYG{o}{=} \PYG{l+m+mi}{1}
 
-    \PYG{n}{pi} \PYG{o}{=} \PYG{n}{dijkstra}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,}\PYG{n}{A}\PYG{p}{,}\PYG{n}{B}\PYG{p}{)}
-    \PYG{n}{plot\PYGZus{}graph}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{pi}\PYG{p}{)}
+    \PYG{n}{pi}\PYG{p}{,} \PYG{n}{\PYGZus{}} \PYG{o}{=} \PYG{n}{dijkstra}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,}\PYG{n}{A}\PYG{p}{,}\PYG{n}{B}\PYG{p}{)}
+    \PYG{n}{plot\PYGZus{}graph}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{pi}\PYG{p}{,} \PYG{n}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}Graph\PYGZdq{}}\PYG{p}{)}
     \PYG{n+nb}{print}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{)}
 
-\PYG{n}{run\PYGZus{}example}\PYG{p}{()}
+\PYG{k}{def} \PYG{n+nf}{performance\PYGZus{}analysis}\PYG{p}{(}\PYG{n}{start} \PYG{o}{=} \PYG{l+m+mi}{5}\PYG{p}{,} \PYG{n}{stop}\PYG{o}{=}\PYG{l+m+mi}{13}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Description}
+\PYG{l+s+sd}{    \PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sd}{    Plot of time of execution for different values of N for the same k}
+\PYG{l+s+sd}{    Values of N are given by N = [2**start, 2**(start+1), ..., 2**end]}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{N} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{l+m+mi}{2}\PYG{o}{**}\PYG{n}{i} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{start}\PYG{p}{,} \PYG{n}{stop}\PYG{p}{)])}
+    \PYG{n}{k} \PYG{o}{=} \PYG{l+m+mi}{20}
+    \PYG{n}{T} \PYG{o}{=} \PYG{p}{[]}
+
+
+    \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n}{tqdm}\PYG{o}{.}\PYG{n}{tqdm}\PYG{p}{(}\PYG{n}{N}\PYG{p}{):}
+        \PYG{n}{t} \PYG{o}{=} \PYG{p}{[]}
+        \PYG{k}{for} \PYG{n}{\PYGZus{}} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{20}\PYG{p}{):}
+            \PYG{n}{G} \PYG{o}{=} \PYG{n}{ER}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{((}\PYG{n}{k}\PYG{o}{*}\PYG{n}{n}\PYG{p}{)}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{))}
+            \PYG{c+c1}{\PYGZsh{} Only choose from connected nodes}
+            \PYG{n}{connected\PYGZus{}vertices} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{unique}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}start\PYGZus{}node\PYGZsq{}}\PYG{p}{])}
+            \PYG{n}{start\PYGZus{}stop\PYGZus{}node} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{connected\PYGZus{}vertices}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
+            \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{ct} \PYG{o}{=} \PYG{n}{dijkstra}\PYG{p}{(}\PYG{n}{G}\PYG{p}{,} \PYG{n}{start\PYGZus{}stop\PYGZus{}node}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{],} \PYG{n}{start\PYGZus{}stop\PYGZus{}node}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{])}
+            \PYG{n}{t}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{ct}\PYG{p}{)}
+        \PYG{n}{T}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{average}\PYG{p}{(}\PYG{n}{t}\PYG{p}{))}
+
+    \PYG{n}{fig}\PYG{p}{,} \PYG{n}{ax} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{subplots}\PYG{p}{()}
+    \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{T}\PYG{p}{,} \PYG{n}{label} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}Execution time\PYGZsq{}}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Time complexities}
+    \PYG{n}{N} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{logspace}\PYG{p}{(}\PYG{n}{start}\PYG{p}{,} \PYG{n}{stop}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{num}\PYG{o}{=}\PYG{n+nb}{int}\PYG{p}{((}\PYG{n}{stop}\PYG{o}{\PYGZhy{}}\PYG{n}{start}\PYG{p}{)}\PYG{o}{*}\PYG{l+m+mi}{5}\PYG{p}{),} \PYG{n}{base}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{int}\PYG{p}{)}
+    \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{p}{(}\PYG{n}{N}\PYG{o}{**}\PYG{l+m+mi}{2}\PYG{o}{/}\PYG{n}{N}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{**}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{*}\PYG{n}{T}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{],} \PYG{n}{label} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}\PYGZdl{}O(N\PYGZca{}2)\PYGZdl{}\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{priority\PYGZus{}complexity} \PYG{o}{=} \PYG{p}{((}\PYG{n}{k}\PYG{o}{*}\PYG{n}{N}\PYG{p}{)}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{*}\PYG{n}{np}\PYG{o}{.}\PYG{n}{log}\PYG{p}{(}\PYG{n}{N}\PYG{p}{)}
+    \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{priority\PYGZus{}complexity}\PYG{o}{/}\PYG{n}{priority\PYGZus{}complexity}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{*} \PYG{n}{T}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{],} \PYG{n}{label} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}\PYGZdl{}O((E+N)\PYGZbs{}ln(N))\PYGZdl{}\PYGZsq{}}\PYG{p}{)}
+
+    \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Number of nodes\PYGZdq{}}\PYG{p}{)}
+    \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Path find time\PYGZdq{}}\PYG{p}{)}
+    \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Time to find shortest path for different node sizes\PYGZdq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+    
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}time\PYGZus{}complexity.svg\PYGZdq{}}\PYG{p}{)}
+
+
+\PYG{c+c1}{\PYGZsh{} G = ER(5,6)}
+\PYG{c+c1}{\PYGZsh{} plot\PYGZus{}graph(G, None, name=\PYGZdq{}ER\PYGZus{}example\PYGZdq{}, title=\PYGZdq{}ER example graph\PYGZdq{})}
+
+\PYG{c+c1}{\PYGZsh{} performance\PYGZus{}analysis()}
+
+\PYG{c+c1}{\PYGZsh{} run\PYGZus{}example()}
 \end{Verbatim}
